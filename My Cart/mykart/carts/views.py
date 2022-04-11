@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.template import Context, Template
 
 # Create your views here.
 from django.shortcuts import redirect, render
@@ -17,11 +18,29 @@ def cart_ID(request):
 def add_cart(request,pk):
     product = Product.objects.get(id = pk)
     cartID = cart_ID(request)
-    # cart = Cart.objects.filter(cart_id= cart_ID(request))
+    cart,rest = Cart.objects.get_or_create(cart_id = cartID)
+    cart.save()
+    
 
     
- 
-    cart = Cart.objects.get_or_create(cart_id = cartID)
-    cart.save()
+
+
+
+    try:
+        cart_item = CartItem.objects.get(product = product, cart = cart)
+        cart_item.quantity =cart_item.quantity +  1
+        cart_item.save()
+    except CartItem.DoesNotExist:
+        cart_item = CartItem.objects.create(
+            product = product,
+            quantity = 1,
+            cart = cart,
+        )
+        cart_item.save()
+
+    context = Context({
+        'product' : 'product'
+    })
     return render(request, 'store/cart.html')
 
+ 
