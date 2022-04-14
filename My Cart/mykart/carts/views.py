@@ -70,12 +70,14 @@ def remove_cart(request,pk):
     cart = Cart.objects.get(cart_id = cart_ID(request))
     product = Product.objects.get(id = pk)
     cart_item = CartItem.objects.get(product = product, cart = cart)
+    cart_item.quantity = cart_item.quantity - 1
     if cart_item.quantity>1:
-        cart_item.quantity = cart_item.quantity - 1
-        cart.save()
+        cart_item.quantity -= 1
+        cart_item.save()
     else:
         cart_item.delete()
     return redirect('cart')
+    # return HttpResponse(cart_item.quantity)
 
 def remove_cart_item(request,pk):
     CartItem.objects.filter(id=pk).delete()
