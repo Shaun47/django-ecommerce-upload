@@ -82,6 +82,6 @@ def remove_cart(request,pk):
 
 def remove_cart_item(request,pk):
     CartItem.objects.filter(id=pk).delete()
-
+    
     return redirect('cart')
    
