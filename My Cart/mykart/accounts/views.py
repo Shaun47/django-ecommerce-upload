@@ -1,19 +1,18 @@
 from email import message
 from urllib import request
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from .models import Account
 from django import forms
-from django.contrib import messages
-
+from django.contrib import messages,auth
+from django.contrib.auth.decorators import login_required
 from accounts.forms import RegistrationForm
 
 # Create your views here.
 def register(request):
     form = RegistrationForm(request.POST)
-
     if form.is_valid():
         first_name = form.cleaned_data['first_name']
-        print(first_name)
         last_name = form.cleaned_data['last_name']
         phone_number = form.cleaned_data['phone_number']
         email = form.cleaned_data['email']
@@ -34,12 +33,33 @@ def register(request):
     
 
 def login(request):
+    if request.method == "POST":
+        email = request.POST['email']
+        password = request.POST['password']
+
+        user = auth.authenticate(email=email,password=password)
+
+        if user is not None:
+            auth.login(request,user)
+            # messages.success(request,'You are not logged in')
+            return redirect('dashboard')
+            
+        else:
+            messages.error(request,'Invalid login credentials')
+            return redirect('login')
     return render(request, 'accounts/login.html')
 
 
+@login_required(login_url='login')
 def logout(request):
-    return 
+    auth.logout(request)
+    messages.success(request, 'You are logged out.')
+    return redirect('login')
 
+
+@login_required(login_url='login')
+def dashboard(request):
+    return render(request,'accounts/dashboard.html')
 
 
 def clean(self):
