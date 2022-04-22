@@ -14,7 +14,7 @@ def cart_ID(request):
     cartID = request.session.session_key
     if not cartID:
         cartID = request.session.create()
-    return cartID
+    return HttpResponse(cartID)
 
 
 def add_cart(request,pk):
