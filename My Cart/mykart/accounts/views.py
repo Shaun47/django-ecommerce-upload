@@ -17,6 +17,10 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes,force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import EmailMessage
+from carts.views import cart_ID
+from carts.models import Cart, CartItem
+
+
 
 # Create your views here.
 def register(request):
@@ -54,13 +58,24 @@ def register(request):
     
 
 def login(request):
-    if request.method == "POST":
+    if request.method == "POST":    
         email = request.POST['email']
         password = request.POST['password']
 
         user = auth.authenticate(email=email,password=password)
 
         if user is not None:
+            try:
+                cart = Cart.objects.get(cart_id = cart_ID(request))
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                if is_cart_item_exists:
+                    cart_item = CartItem.objects.filter(cart=cart)
+
+                    for item in cart_item:
+                        item.user = user
+                        item.save()
+            except:
+                pass
             auth.login(request,user)
             # messages.success(request,'You are not logged in')
             return redirect('dashboard')
